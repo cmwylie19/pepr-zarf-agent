@@ -26,7 +26,7 @@ import (
 	"github.com/defenseunicorns/zarf/src/pkg/transform"
 )
 
-func WasmImageTransformHost(this js.Value, args []js.Value) interface{} {
+func ImageTransformHost(this js.Value, args []js.Value) interface{} {
 	targetHost := args[0].String()
 	srcReference := args[1].String()
 	transformedImage, _ := transform.ImageTransformHost(targetHost, srcReference)
@@ -35,6 +35,6 @@ func WasmImageTransformHost(this js.Value, args []js.Value) interface{} {
 
 func main() {
 	c := make(chan bool)
-	js.Global().Set("WasmImageTransformHost", js.FuncOf(WasmImageTransformHost))
+	js.Global().Set("WasmImageTransformHost", js.FuncOf(ImageTransformHost))
 	<-c
 }

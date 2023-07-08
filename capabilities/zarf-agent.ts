@@ -19,8 +19,8 @@ const { When } = ZarfAgent;
  * ---------------------------------------------------------------------------------------------------
  * Initialize InitSecrets & TransformerAPI
  */
-let _initSecrets = new InitSecrets(new K8sAPI());
-let _transformer = new TransformerAPI();
+const _initSecrets = new InitSecrets(new K8sAPI());
+const _transformer = new TransformerAPI();
 
 /**
  * ---------------------------------------------------------------------------------------------------
@@ -97,10 +97,12 @@ When(a.Pod)
 
       try {
         // transform all containers in pod
-        await _transformer.transformAllContainers(
+         _transformer.run().then(() => {
+          _transformer.transformAllContainers(
           pod,
           _initSecrets.zarfStateSecret.registryInfo.address
         );
+          });
 
         // add zarf-agent label to pod to be ignored next time
         pod.SetAnnotation("zarg-agent/dev", "patched");
