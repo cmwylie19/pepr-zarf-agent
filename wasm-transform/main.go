@@ -16,6 +16,8 @@
 // 	select {}
 // }
 
+//go:build js && wasm
+
 package main
 
 import (
@@ -24,11 +26,11 @@ import (
 	"github.com/defenseunicorns/zarf/src/pkg/transform"
 )
 
-func WasmImageTransformHost(this js.Value, args []js.Value) (string, error) {
-	targetHost := args[0].string()
-	srcReference := args[1].string()
+func WasmImageTransformHost(this js.Value, args []js.Value) interface{} {
+	targetHost := args[0].String()
+	srcReference := args[1].String()
 	transformedImage, _ := transform.ImageTransformHost(targetHost, srcReference)
-	return transformedImage, nil
+	return transformedImage
 }
 
 func main() {
