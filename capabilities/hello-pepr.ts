@@ -49,10 +49,11 @@ When(a.Namespace)
 When(a.ConfigMap)
   .IsCreated()
   .WithName("example-1")
-  .Then(request =>
+  .Then(request => {
     request
       .SetLabel("pepr", "was-here")
       .SetAnnotation("pepr.dev", "annotations-work-too")
+  }
   );
 
 /**

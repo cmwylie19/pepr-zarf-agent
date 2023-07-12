@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <script src="wasm_exec.js"></script>
+  <title>WASM Integration Test</title>
+  <style>
+    container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+  <div style="display:inline-flex;">WASM Response: <main id="wasm"></main></div><br />
+  num1 <input type="text" id="num1" /> <br />
+  num2 <input type="text" id="num2" />
+  <button onclick="callWASM()"> call WASM</button>
+</div>
+  <hr />
+  <button onclick="getWASMRequest()"> call getWASMRequest</button>
+
+
+  <script>
+    const go = new Go();
+    WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
+      go.run(result.instance);
+    });
+  </script>
+  <container>
+    <pre id="admissionReviewPre">
+
+apiVersion: admission.k8s.io/v1
+kind: AdmissionReview
+request:
+  uid: 705ab4f5-6393-11e8-b7cc-42010a800002
+  kind:
+    group: autoscaling
+    version: v1
+    kind: Scale
+  resource:
+    group: apps
+    version: v1
+    resource: deployments
+  subResource: scale
+
+  requestKind:
+    group: autoscaling
+    version: v1
+    kind: Scale
+  requestResource:
+    group: apps
+    version: v1
+    resource: deployments
+  requestSubResource: scale
+  name: my-deployment
+  namespace: my-namespace
+  operation: UPDATE
+
+  userInfo:
+    username: admin
+
+    uid: 014fbff9a07c
+    groups:
+      - system:authenticated
+      - my-admin-group
+    extra:
+      some-key:
+        - some-value1
+        - some-value2
+  object:
+    apiVersion: autoscaling/v1
+    kind: Scale
+  oldObject:
+    apiVersion: autoscaling/v1
+    kind: Scale
+  options:
+    apiVersion: meta.k8s.io/v1
+    kind: UpdateOptions
+  dryRun: False
+</pre>
+    <pre id="admissionReviewPost"></pre>
+  </container>
+</body>
+<script>
+  num1 = document.getElementById("num1")
+  num2 = document.getElementById("num2")
+  admissionRequestPre = document.getElementById("admissionReviewPre")
+  admissionRequestPost = document.getElementById("admissionReviewPost")
+
+  function callWASM() {
+    n1 = parseInt(num1.value)
+    n2 = parseInt(num2.value)
+    document.getElementById("wasm").innerHTML = add(n1, n2)
+  }
+
+  function getWASMRequest() {
+   admissionRequestPost.innerHTML = ConvertToWASMRequest(admissionRequestPre.innerHTML)
+  }
+
+
+</script>
+
+</html>
