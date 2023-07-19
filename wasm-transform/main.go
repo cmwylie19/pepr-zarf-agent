@@ -213,7 +213,7 @@ func addImagePullSecret(pod *corev1.Pod, imagePullSecretName string, patchOperat
 
 func transformContainerImages(pod *corev1.Pod, targetHost, srcReference string, patchOperations []PatchOperation) []PatchOperation {
 	// update the image host for each init container
-	for idx, container := range pod.Spec.InitContainers {
+	for idx, _ := range pod.Spec.InitContainers {
 		path := fmt.Sprintf("/spec/initContainers/%d/image", idx)
 		replacement, err := transform.ImageTransformHost(targetHost, srcReference)
 
@@ -221,31 +221,33 @@ func transformContainerImages(pod *corev1.Pod, targetHost, srcReference string, 
 			fmt.Printf(AgentErrImageSwap, err)
 			continue // Continue, because we might as well attempt to mutate the other containers for this pod
 		}
-		container.Image = replacement
+		pod.Spec.InitContainers[idx].Image = replacement
 		patchOperations = append(patchOperations, ReplacePatchOperation(path, replacement))
 	}
 
 	// update the image host for each ephemeral container
-	for idx, container := range pod.Spec.EphemeralContainers {
+	for idx, _ := range pod.Spec.EphemeralContainers {
 		path := fmt.Sprintf("/spec/ephemeralContainers/%d/image", idx)
 		replacement, err := transform.ImageTransformHost(targetHost, srcReference)
 		if err != nil {
 			fmt.Printf(AgentErrImageSwap, err)
 			continue // Continue, because we might as well attempt to mutate the other containers for this pod
 		}
-		container.Image = replacement
+		pod.Spec.EphemeralContainers[idx].Image = replacement
 		patchOperations = append(patchOperations, ReplacePatchOperation(path, replacement))
 	}
 
 	// update the image host for each normal container
-	for idx, container := range pod.Spec.Containers {
+	for idx, _ := range pod.Spec.Containers {
 		path := fmt.Sprintf("/spec/containers/%d/image", idx)
 		replacement, err := transform.ImageTransformHost(targetHost, srcReference)
 		if err != nil {
 			fmt.Printf(AgentErrImageSwap, err)
 			continue // Continue, because we might as well attempt to mutate the other containers for this pod
 		}
-		container.Image = replacement
+		fmt.Println("replacement", replacement)
+		pod.Spec.Containers[idx].Image = replacement
+		fmt.Println(pod.Spec.Containers[idx].Image)
 		patchOperations = append(patchOperations, ReplacePatchOperation(path, replacement))
 	}
 	return patchOperations
