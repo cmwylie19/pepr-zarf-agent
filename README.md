@@ -1,5 +1,19 @@
 # Pepr Module
 
+High Level Overview Demo
+
+```bash
+git clone -b wasm-refined https://github.com/cmwylie19/pepr-zarf-agent.git
+cd pepr-zarf-agent
+cd wasm-transform
+make build/wasm-transformer   
+cd ../wasm-integration-test
+go run main.go
+```
+Open browser to [localhost:9090](http://localhost:9090/)
+
+
+
 - [High Level Overview](#high-level-overview)
 - [Check List](#check-list)
 - [Full e2e Demo](#full-e2e-demo)
