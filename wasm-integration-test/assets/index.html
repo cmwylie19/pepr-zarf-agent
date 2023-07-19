@@ -48,8 +48,6 @@
       });
     </script>
 
-
-
     <h4 class="left">Pod Preview</h4>
     <hr />
 
@@ -384,7 +382,12 @@
     podPost = document.getElementById("podPost");
     let wasmRequest = {};
     function callPodTransform() {
-      podPost.innerHTML = podTransform(podPre.innerHTML,"regcred","gitlab.com/project/","nginx");
+      podPost.innerHTML = podTransform(
+        podPre.innerHTML,
+        "regcred",
+        "gitlab.com/project/",
+        "nginx"
+      );
     }
     function callGetResource() {
       resourcePost.innerHTML = GetResource(resourcePre.innerHTML);
