@@ -5,10 +5,12 @@ import (
 	// "syscall/js"
 
 	// "fmt"
-
 	"encoding/json"
 	"fmt"
+	"log"
 	"syscall/js"
+
+	corev1 "k8s.io/api/core/v1"
 
 	"github.com/defenseunicorns/zarf/src/pkg/transform"
 	admission "k8s.io/api/admission/v1"
@@ -115,6 +117,41 @@ func ConvertAdmissionRequest(this js.Value, args []js.Value) interface{} {
 	// QuickType used to generate Go structs to TS Interfaces
 	// Play with a map of interfaces
 }
+
+func podTransform(this js.Value, args []js.Value) interface{} {
+	pod := &corev1.Pod{}
+
+	// fmt.Println(args[0].String())
+	fmt.Println("Empty pod", pod.Name)
+	// Define a variable to hold the parsed JSON data
+	var data map[string]interface{}
+
+	// Unmarshal the JSON string into the data variable
+	err := json.Unmarshal([]byte(args[0].String()), &data)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Convert the interface to a JSON byte array
+	jsonBytes, err := json.Marshal(data["Raw"])
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = json.Unmarshal(jsonBytes, pod)
+	if err != nil {
+		fmt.Println("Error unmarshalling pod", err)
+
+	}
+
+	// check if pod has ignore labels
+	// js.Value[0] is the pod,_input(AdmissionReview) from pepr
+
+	//targetHost := fmt.Sprintf("%s", args[1])
+	//srcReference := fmt.Sprintf("%s", args[2])
+	fmt.Printf("%s\n", pod.Name)
+	fmt.Println(fmt.Sprintf("%s", data["Raw"]))
+	return nil
+}
 func add(this js.Value, args []js.Value) interface{} {
 	if len(args) != 2 {
 		return nil
@@ -130,6 +167,7 @@ func main() {
 	js.Global().Set("ConvertAdmissionRequest", js.FuncOf(ConvertAdmissionRequest))
 	js.Global().Set("TransformImage", js.FuncOf(TransformImage))
 	js.Global().Set("GetResource", js.FuncOf(GetResource))
+	js.Global().Set("podTransform", js.FuncOf(podTransform))
 	// research how to scope functions to a module
 	// - would  all wasm functions from an AdmissionPatch
 	// -- pod.Merge and return a deepPartial from WASM
@@ -138,3 +176,5 @@ func main() {
 
 	select {}
 }
+
+// https://go.dev/play/p/AIzdixvCzNW

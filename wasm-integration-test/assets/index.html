@@ -17,7 +17,6 @@
       margin-bottom: 4px !important;
       font-weight: 700;
       /* padding: 4px; */
-
     }
 
     container {
@@ -39,8 +38,6 @@
     srcReference <input type="text" id="srcReference" />
     <button onclick="callWASMTransformImage()">Transform Image</button>
   </div>
-
- 
 
   <script>
     const go = new Go();
@@ -123,7 +120,7 @@
 
   <h4 class="left">Resource Preview</h4>
   <hr />
- 
+
   <container>
     <pre id="resourcePre">
 
@@ -156,20 +153,344 @@
     <pre id="resourcePost"></pre>
     <button onclick="callGetResource()">call getResource</button>
   </container>
+
+  <h4 class="left">Pod Preview</h4>
+  <hr />
+
+  <container>
+    <pre id="podPre">
+{
+  "Raw": {
+    "kind": "Pod",
+    "apiVersion": "v1",
+    "metadata": {
+      "name": "n",
+      "namespace": "pepr-demo",
+      "creationTimestamp": null,
+      "labels": {
+        "run": "n"
+      },
+      "managedFields": [
+        {
+          "manager": "kubectl-run",
+          "operation": "Update",
+          "apiVersion": "v1",
+          "time": "2023-07-19T17:08:49Z",
+          "fieldsType": "FieldsV1",
+          "fieldsV1": {
+            "f:metadata": {
+              "f:labels": {
+                ".": {},
+                "f:run": {}
+              }
+            },
+            "f:spec": {
+              "f:containers": {
+                "k:{\"name\":\"n\"}": {
+                  ".": {},
+                  "f:image": {},
+                  "f:imagePullPolicy": {},
+                  "f:name": {},
+                  "f:resources": {},
+                  "f:terminationMessagePath": {},
+                  "f:terminationMessagePolicy": {}
+                }
+              },
+              "f:dnsPolicy": {},
+              "f:enableServiceLinks": {},
+              "f:restartPolicy": {},
+              "f:schedulerName": {},
+              "f:securityContext": {},
+              "f:terminationGracePeriodSeconds": {}
+            }
+          }
+        }
+      ],
+      "annotations": {
+        "bc6a9d02-8e19-55ae-9306-72fdf34b7ffa.pepr.dev/hello-pepr": "started"
+      }
+    },
+    "spec": {
+      "volumes": [
+        {
+          "name": "kube-api-access-pldrf",
+          "projected": {
+            "sources": [
+              {
+                "serviceAccountToken": {
+                  "expirationSeconds": 3607,
+                  "path": "token"
+                }
+              },
+              {
+                "configMap": {
+                  "name": "kube-root-ca.crt",
+                  "items": [
+                    {
+                      "key": "ca.crt",
+                      "path": "ca.crt"
+                    }
+                  ]
+                }
+              },
+              {
+                "downwardAPI": {
+                  "items": [
+                    {
+                      "path": "namespace",
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.namespace"
+                      }
+                    }
+                  ]
+                }
+              }
+            ],
+            "defaultMode": 420
+          }
+        }
+      ],
+      "containers": [
+        {
+          "name": "n",
+          "image": "nginx",
+          "resources": {},
+          "volumeMounts": [
+            {
+              "name": "kube-api-access-pldrf",
+              "readOnly": true,
+              "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+            }
+          ],
+          "terminationMessagePath": "/dev/termination-log",
+          "terminationMessagePolicy": "File",
+          "imagePullPolicy": "Always"
+        }
+      ],
+      "restartPolicy": "Always",
+      "terminationGracePeriodSeconds": 30,
+      "dnsPolicy": "ClusterFirst",
+      "serviceAccountName": "default",
+      "serviceAccount": "default",
+      "securityContext": {},
+      "schedulerName": "default-scheduler",
+      "tolerations": [
+        {
+          "key": "node.kubernetes.io/not-ready",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        },
+        {
+          "key": "node.kubernetes.io/unreachable",
+          "operator": "Exists",
+          "effect": "NoExecute",
+          "tolerationSeconds": 300
+        }
+      ],
+      "priority": 0,
+      "enableServiceLinks": true,
+      "preemptionPolicy": "PreemptLowerPriority"
+    },
+    "status": {}
+  },
+  "_input": {
+    "uid": "c9825871-3b32-4020-9f9a-5d43a5b1ff23",
+    "kind": {
+      "group": "",
+      "version": "v1",
+      "kind": "Pod"
+    },
+    "resource": {
+      "group": "",
+      "version": "v1",
+      "resource": "pods"
+    },
+    "requestKind": {
+      "group": "",
+      "version": "v1",
+      "kind": "Pod"
+    },
+    "requestResource": {
+      "group": "",
+      "version": "v1",
+      "resource": "pods"
+    },
+    "name": "n",
+    "namespace": "pepr-demo",
+    "operation": "CREATE",
+    "userInfo": {
+      "username": "system:admin",
+      "groups": [
+        "system:masters",
+        "system:authenticated"
+      ]
+    },
+    "object": {
+      "kind": "Pod",
+      "apiVersion": "v1",
+      "metadata": {
+        "name": "n",
+        "namespace": "pepr-demo",
+        "creationTimestamp": null,
+        "labels": {
+          "run": "n"
+        },
+        "managedFields": [
+          {
+            "manager": "kubectl-run",
+            "operation": "Update",
+            "apiVersion": "v1",
+            "time": "2023-07-19T17:08:49Z",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:labels": {
+                  ".": {},
+                  "f:run": {}
+                }
+              },
+              "f:spec": {
+                "f:containers": {
+                  "k:{\"name\":\"n\"}": {
+                    ".": {},
+                    "f:image": {},
+                    "f:imagePullPolicy": {},
+                    "f:name": {},
+                    "f:resources": {},
+                    "f:terminationMessagePath": {},
+                    "f:terminationMessagePolicy": {}
+                  }
+                },
+                "f:dnsPolicy": {},
+                "f:enableServiceLinks": {},
+                "f:restartPolicy": {},
+                "f:schedulerName": {},
+                "f:securityContext": {},
+                "f:terminationGracePeriodSeconds": {}
+              }
+            }
+          }
+        ]
+      },
+      "spec": {
+        "volumes": [
+          {
+            "name": "kube-api-access-pldrf",
+            "projected": {
+              "sources": [
+                {
+                  "serviceAccountToken": {
+                    "expirationSeconds": 3607,
+                    "path": "token"
+                  }
+                },
+                {
+                  "configMap": {
+                    "name": "kube-root-ca.crt",
+                    "items": [
+                      {
+                        "key": "ca.crt",
+                        "path": "ca.crt"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "downwardAPI": {
+                    "items": [
+                      {
+                        "path": "namespace",
+                        "fieldRef": {
+                          "apiVersion": "v1",
+                          "fieldPath": "metadata.namespace"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "defaultMode": 420
+            }
+          }
+        ],
+        "containers": [
+          {
+            "name": "n",
+            "image": "nginx",
+            "resources": {},
+            "volumeMounts": [
+              {
+                "name": "kube-api-access-pldrf",
+                "readOnly": true,
+                "mountPath": "/var/run/secrets/kubernetes.io/serviceaccount"
+              }
+            ],
+            "terminationMessagePath": "/dev/termination-log",
+            "terminationMessagePolicy": "File",
+            "imagePullPolicy": "Always"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst",
+        "serviceAccountName": "default",
+        "serviceAccount": "default",
+        "securityContext": {},
+        "schedulerName": "default-scheduler",
+        "tolerations": [
+          {
+            "key": "node.kubernetes.io/not-ready",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          },
+          {
+            "key": "node.kubernetes.io/unreachable",
+            "operator": "Exists",
+            "effect": "NoExecute",
+            "tolerationSeconds": 300
+          }
+        ],
+        "priority": 0,
+        "enableServiceLinks": true,
+        "preemptionPolicy": "PreemptLowerPriority"
+      },
+      "status": {}
+    },
+    "oldObject": null,
+    "dryRun": false,
+    "options": {
+      "kind": "CreateOptions",
+      "apiVersion": "meta.k8s.io/v1",
+      "fieldManager": "kubectl-run"
+    }
+  }
+}
+
+    
+</pre>
+    <pre id="podPost"></pre>
+    <button onclick="callPodTransform()">call podTransform</button>
+  </container>
+
 </body>
 <script>
   targetHost = document.getElementById("targetHost");
   srcReference = document.getElementById("srcReference");
-  transformedImage = document.getElementById("transformedImage")
+  transformedImage = document.getElementById("transformedImage");
   admissionRequestPre = document.getElementById("admissionReviewPre");
   admissionRequestPost = document.getElementById("admissionReviewPost");
-  resourcePre = document.getElementById("resourcePre")
-  resourcePost = document.getElementById("resourcePost")
-  let wasmRequest = {}
-
+  resourcePre = document.getElementById("resourcePre");
+  resourcePost = document.getElementById("resourcePost");
+  let wasmRequest = {};
+  function callPodTransform() {
+    podTransform(podPre.innerHTML);
+  }
   function callGetResource() {
-    resourcePost.innerHTML = GetResource(resourcePre.innerHTML)
-    wasmRequest.Resource = GetResource(resourcePre.innerHTML)
+    resourcePost.innerHTML = GetResource(resourcePre.innerHTML);
+    wasmRequest.Resource = GetResource(resourcePre.innerHTML);
   }
   function callWASMTransformImage() {
     target_host = targetHost.value;
@@ -182,11 +503,10 @@
     let admissionRequest = ConvertAdmissionRequest(
       admissionRequestPre.innerHTML
     );
-    console.log("Im working")
-    console.log(`wasmRequestEgress: `, JSON.stringify(admissionRequest))
-    admissionRequestPost.innerHTML = JSON.stringify(admissionRequest)
-    wasmRequest.Request = admissionRequest
-
+    console.log("Im working");
+    console.log(`wasmRequestEgress: `, JSON.stringify(admissionRequest));
+    admissionRequestPost.innerHTML = JSON.stringify(admissionRequest);
+    wasmRequest.Request = admissionRequest;
   }
 </script>
 
