@@ -1,59 +1,58 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="wasm_exec.js"></script>
+    <title>WASM Integration Test</title>
+    <style>
+      .left {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 100%;
+        position: absolute;
+        left: 0;
+        right: 0;
+        margin-bottom: 4px !important;
+        font-weight: 700;
+        /* padding: 4px; */
+      }
 
-<head>
-  <meta charset="UTF-8" />
-  <script src="wasm_exec.js"></script>
-  <title>WASM Integration Test</title>
-  <style>
-    .left {
-      display: flex;
-      justify-content: flex-start;
-      align-items: center;
-      width: 100%;
-      position: absolute;
-      left: 0;
-      right: 0;
-      margin-bottom: 4px !important;
-      font-weight: 700;
-      /* padding: 4px; */
-    }
+      container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    </style>
+  </head>
 
-    container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-  </style>
-</head>
-
-<body>
-  <div>
-    <div style="display: inline-flex">
-      WASM Response:
-      <main id="transformedImage"></main>
+  <body>
+    <div>
+      <div style="display: inline-flex">
+        WASM Response:
+        <main id="transformedImage"></main>
+      </div>
+      <br />
+      targetHost <input type="text" id="targetHost" /> <br />
+      srcReference <input type="text" id="srcReference" />
+      <button onclick="callWASMTransformImage()">Transform Image</button>
     </div>
-    <br />
-    targetHost <input type="text" id="targetHost" /> <br />
-    srcReference <input type="text" id="srcReference" />
-    <button onclick="callWASMTransformImage()">Transform Image</button>
-  </div>
 
-  <script>
-    const go = new Go();
-    WebAssembly.instantiateStreaming(
-      fetch("main.wasm"),
-      go.importObject
-    ).then(result => {
-      go.run(result.instance);
-    });
-  </script>
+    <script>
+      const go = new Go();
+      WebAssembly.instantiateStreaming(
+        fetch("main.wasm"),
+        go.importObject
+      ).then(result => {
+        go.run(result.instance);
+      });
+    </script>
 
-  <h4 class="left">Pod Preview</h4>
-  <hr />
+    <h4 class="left">Pod Preview</h4>
+    <hr />
 
-  <container>
-    <pre id="podPre">
+    <container>
+      <pre id="podPre">
 {
   "Raw": {
     "kind": "Pod",
@@ -365,36 +364,35 @@
 }
 
     
-</pre>
-    <pre id="podPost"></pre>
-    <button onclick="callPodTransform()">call podTransform</button>
-  </container>
-</body>
-<script>
-  targetHost = document.getElementById("targetHost");
-  srcReference = document.getElementById("srcReference");
-  transformedImage = document.getElementById("transformedImage");
-  podPre = document.getElementById("podPre");
-  podPost = document.getElementById("podPost");
-  let wasmRequest = {};
-  function callPodTransform() {
-    let transformedPod = podTransform(
-      podPre.innerHTML,
-      "regcred",
-      "gitlab.com/project",
-      "nginx"
-    );
+</pre
+      >
+      <pre id="podPost"></pre>
+      <button onclick="callPodTransform()">call podTransform</button>
+    </container>
+  </body>
+  <script>
+    targetHost = document.getElementById("targetHost");
+    srcReference = document.getElementById("srcReference");
+    transformedImage = document.getElementById("transformedImage");
+    podPre = document.getElementById("podPre");
+    podPost = document.getElementById("podPost");
+    let wasmRequest = {};
+    function callPodTransform() {
+      let transformedPod = podTransform(
+        podPre.innerHTML,
+        "regcred",
+        "gitlab.com/project",
+        "nginx"
+      );
 
-    podPost.innerHTML = transformedPod
-  }
+      podPost.innerHTML = transformedPod;
+    }
 
-  function callWASMTransformImage() {
-    target_host = targetHost.value;
-    src_reference = srcReference.value;
-    transformedImage.innerHTML = TransformImage(target_host, src_reference);
-    //wasmRequest.Args = [target_host,src_reference,TransformImage(target_host, src_reference);]
-  }
-
-</script>
-
+    function callWASMTransformImage() {
+      target_host = targetHost.value;
+      src_reference = srcReference.value;
+      transformedImage.innerHTML = TransformImage(target_host, src_reference);
+      //wasmRequest.Args = [target_host,src_reference,TransformImage(target_host, src_reference);]
+    }
+  </script>
 </html>
