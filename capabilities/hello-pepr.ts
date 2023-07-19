@@ -52,9 +52,8 @@ When(a.ConfigMap)
   .Then(request => {
     request
       .SetLabel("pepr", "was-here")
-      .SetAnnotation("pepr.dev", "annotations-work-too")
-  }
-  );
+      .SetAnnotation("pepr.dev", "annotations-work-too");
+  });
 
 /**
  * ---------------------------------------------------------------------------------------------------

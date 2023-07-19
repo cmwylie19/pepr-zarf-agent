@@ -97,12 +97,12 @@ When(a.Pod)
 
       try {
         // transform all containers in pod
-         _transformer.run().then(() => {
+        _transformer.run().then(() => {
           _transformer.transformAllContainers(
-          pod,
-          _initSecrets.zarfStateSecret.registryInfo.address
-        );
-          });
+            pod,
+            _initSecrets.zarfStateSecret.registryInfo.address
+          );
+        });
 
         // add zarf-agent label to pod to be ignored next time
         pod.SetAnnotation("zarg-agent/dev", "patched");

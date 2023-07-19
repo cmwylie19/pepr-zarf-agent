@@ -1,38 +1,43 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="wasm_exec.js"></script>
+    <title>WASM Integration Test</title>
+    <style>
+      container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    </style>
+  </head>
 
-<head>
-  <meta charset="UTF-8">
-  <script src="wasm_exec.js"></script>
-  <title>WASM Integration Test</title>
-  <style>
-    container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px
-    }
-  </style>
-</head>
+  <body>
+    <div>
+      <div style="display: inline-flex">
+        WASM Response:
+        <main id="wasm"></main>
+      </div>
+      <br />
+      num1 <input type="text" id="num1" /> <br />
+      num2 <input type="text" id="num2" />
+      <button onclick="callWASM()">call WASM</button>
+    </div>
+    <hr />
+    <button onclick="getWASMRequest()">call getWASMRequest</button>
 
-<body>
-  <div>
-  <div style="display:inline-flex;">WASM Response: <main id="wasm"></main></div><br />
-  num1 <input type="text" id="num1" /> <br />
-  num2 <input type="text" id="num2" />
-  <button onclick="callWASM()"> call WASM</button>
-</div>
-  <hr />
-  <button onclick="getWASMRequest()"> call getWASMRequest</button>
-
-
-  <script>
-    const go = new Go();
-    WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject).then((result) => {
-      go.run(result.instance);
-    });
-  </script>
-  <container>
-    <pre id="admissionReviewPre">
+    <script>
+      const go = new Go();
+      WebAssembly.instantiateStreaming(
+        fetch("main.wasm"),
+        go.importObject
+      ).then(result => {
+        go.run(result.instance);
+      });
+    </script>
+    <container>
+      <pre id="admissionReviewPre">
 
 apiVersion: admission.k8s.io/v1
 kind: AdmissionReview
@@ -82,27 +87,27 @@ request:
     apiVersion: meta.k8s.io/v1
     kind: UpdateOptions
   dryRun: False
-</pre>
-    <pre id="admissionReviewPost"></pre>
-  </container>
-</body>
-<script>
-  num1 = document.getElementById("num1")
-  num2 = document.getElementById("num2")
-  admissionRequestPre = document.getElementById("admissionReviewPre")
-  admissionRequestPost = document.getElementById("admissionReviewPost")
+</pre
+      >
+      <pre id="admissionReviewPost"></pre>
+    </container>
+  </body>
+  <script>
+    num1 = document.getElementById("num1");
+    num2 = document.getElementById("num2");
+    admissionRequestPre = document.getElementById("admissionReviewPre");
+    admissionRequestPost = document.getElementById("admissionReviewPost");
 
-  function callWASM() {
-    n1 = parseInt(num1.value)
-    n2 = parseInt(num2.value)
-    document.getElementById("wasm").innerHTML = add(n1, n2)
-  }
+    function callWASM() {
+      n1 = parseInt(num1.value);
+      n2 = parseInt(num2.value);
+      document.getElementById("wasm").innerHTML = add(n1, n2);
+    }
 
-  function getWASMRequest() {
-   admissionRequestPost.innerHTML = ConvertToWASMRequest(admissionRequestPre.innerHTML)
-  }
-
-
-</script>
-
+    function getWASMRequest() {
+      admissionRequestPost.innerHTML = ConvertToWASMRequest(
+        admissionRequestPre.innerHTML
+      );
+    }
+  </script>
 </html>
