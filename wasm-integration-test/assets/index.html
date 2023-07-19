@@ -1,113 +1,193 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <script src="wasm_exec.js"></script>
-    <title>WASM Integration Test</title>
-    <style>
-      container {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 20px;
-      }
-    </style>
-  </head>
 
-  <body>
-    <div>
-      <div style="display: inline-flex">
-        WASM Response:
-        <main id="wasm"></main>
-      </div>
-      <br />
-      num1 <input type="text" id="num1" /> <br />
-      num2 <input type="text" id="num2" />
-      <button onclick="callWASM()">call WASM</button>
+<head>
+  <meta charset="UTF-8" />
+  <script src="wasm_exec.js"></script>
+  <title>WASM Integration Test</title>
+  <style>
+    .left {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      right: 0;
+      margin-bottom: 4px !important;
+      font-weight: 700;
+      /* padding: 4px; */
+
+    }
+
+    container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <div style="display: inline-flex">
+      WASM Response:
+      <main id="transformedImage"></main>
     </div>
-    <hr />
-    <button onclick="getWASMRequest()">call getWASMRequest</button>
+    <br />
+    targetHost <input type="text" id="targetHost" /> <br />
+    srcReference <input type="text" id="srcReference" />
+    <button onclick="callWASMTransformImage()">Transform Image</button>
+  </div>
 
-    <script>
-      const go = new Go();
-      WebAssembly.instantiateStreaming(
-        fetch("main.wasm"),
-        go.importObject
-      ).then(result => {
-        go.run(result.instance);
-      });
-    </script>
-    <container>
-      <pre id="admissionReviewPre">
+ 
 
-apiVersion: admission.k8s.io/v1
-kind: AdmissionReview
-request:
-  uid: 705ab4f5-6393-11e8-b7cc-42010a800002
-  kind:
-    group: autoscaling
-    version: v1
-    kind: Scale
-  resource:
-    group: apps
-    version: v1
-    resource: deployments
-  subResource: scale
-
-  requestKind:
-    group: autoscaling
-    version: v1
-    kind: Scale
-  requestResource:
-    group: apps
-    version: v1
-    resource: deployments
-  requestSubResource: scale
-  name: my-deployment
-  namespace: my-namespace
-  operation: UPDATE
-
-  userInfo:
-    username: admin
-
-    uid: 014fbff9a07c
-    groups:
-      - system:authenticated
-      - my-admin-group
-    extra:
-      some-key:
-        - some-value1
-        - some-value2
-  object:
-    apiVersion: autoscaling/v1
-    kind: Scale
-  oldObject:
-    apiVersion: autoscaling/v1
-    kind: Scale
-  options:
-    apiVersion: meta.k8s.io/v1
-    kind: UpdateOptions
-  dryRun: False
-</pre
-      >
-      <pre id="admissionReviewPost"></pre>
-    </container>
-  </body>
   <script>
-    num1 = document.getElementById("num1");
-    num2 = document.getElementById("num2");
-    admissionRequestPre = document.getElementById("admissionReviewPre");
-    admissionRequestPost = document.getElementById("admissionReviewPost");
-
-    function callWASM() {
-      n1 = parseInt(num1.value);
-      n2 = parseInt(num2.value);
-      document.getElementById("wasm").innerHTML = add(n1, n2);
-    }
-
-    function getWASMRequest() {
-      admissionRequestPost.innerHTML = ConvertToWASMRequest(
-        admissionRequestPre.innerHTML
-      );
-    }
+    const go = new Go();
+    WebAssembly.instantiateStreaming(
+      fetch("main.wasm"),
+      go.importObject
+    ).then(result => {
+      go.run(result.instance);
+    });
   </script>
+
+  <h4 class="left">Admission Review</h4>
+  <hr />
+  <container>
+    <pre id="admissionReviewPre">
+
+{
+  "apiVersion": "admission.k8s.io/v1",
+  "kind": "AdmissionReview",
+  "request": {
+      "uid": "705ab4f5-6393-11e8-b7cc-42010a800002",
+      "kind": {
+          "group": "autoscaling",
+          "version": "v1",
+          "kind": "Scale"
+      },
+      "resource": {
+          "group": "apps",
+          "version": "v1",
+          "resource": "deployments"
+      },
+      "subResource": "scale",
+      "requestKind": {
+          "group": "autoscaling",
+          "version": "v1",
+          "kind": "Scale"
+      },
+      "requestResource": {
+          "group": "apps",
+          "version": "v1",
+          "resource": "deployments"
+      },
+      "requestSubResource": "scale",
+      "name": "my-deployment",
+      "namespace": "my-namespace",
+      "operation": "UPDATE",
+      "userInfo": {
+          "username": "admin",
+          "uid": "014fbff9a07c",
+          "groups": [
+              "system:authenticated",
+              "my-admin-group"
+          ],
+          "extra": {
+              "some-key": [
+                  "some-value1",
+                  "some-value2"
+              ]
+          }
+      },
+      "object": {
+          "apiVersion": "autoscaling/v1",
+          "kind": "Scale"
+      },
+      "oldObject": {
+          "apiVersion": "autoscaling/v1",
+          "kind": "Scale"
+      },
+      "options": {
+          "apiVersion": "meta.k8s.io/v1",
+          "kind": "UpdateOptions"
+      },
+      "dryRun": false
+  }
+}
+</pre>
+    <pre id="admissionReviewPost"></pre>
+    <button onclick="getWASMRequest()">call getWASMRequest</button>
+  </container>
+
+  <h4 class="left">Resource Preview</h4>
+  <hr />
+ 
+  <container>
+    <pre id="resourcePre">
+
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+      "name": "nginx",
+      "namespace": "my-ns",
+      "creationTimestamp": null,
+      "labels": {
+          "run": "nginx"
+      }
+  },
+  "spec": {
+      "containers": [
+          {
+              "name": "nginx",
+              "image": "nginx",
+              "resources": {}
+          }
+      ],
+      "restartPolicy": "Always",
+      "dnsPolicy": "ClusterFirst"
+  },
+  "status": {}
+}
+    
+</pre>
+    <pre id="resourcePost"></pre>
+    <button onclick="callGetResource()">call getResource</button>
+  </container>
+</body>
+<script>
+  targetHost = document.getElementById("targetHost");
+  srcReference = document.getElementById("srcReference");
+  transformedImage = document.getElementById("transformedImage")
+  admissionRequestPre = document.getElementById("admissionReviewPre");
+  admissionRequestPost = document.getElementById("admissionReviewPost");
+  resourcePre = document.getElementById("resourcePre")
+  resourcePost = document.getElementById("resourcePost")
+  let wasmRequest = {}
+
+  function callGetResource() {
+    resourcePost.innerHTML = GetResource(resourcePre.innerHTML)
+    wasmRequest.Resource = GetResource(resourcePre.innerHTML)
+  }
+  function callWASMTransformImage() {
+    target_host = targetHost.value;
+    src_reference = srcReference.value;
+    transformedImage.innerHTML = TransformImage(target_host, src_reference);
+    //wasmRequest.Args = [target_host,src_reference,TransformImage(target_host, src_reference);]
+  }
+
+  function getWASMRequest() {
+    let admissionRequest = ConvertAdmissionRequest(
+      admissionRequestPre.innerHTML
+    );
+    console.log("Im working")
+    console.log(`wasmRequestEgress: `, JSON.stringify(admissionRequest))
+    admissionRequestPost.innerHTML = JSON.stringify(admissionRequest)
+    wasmRequest.Request = admissionRequest
+
+  }
+</script>
+
 </html>

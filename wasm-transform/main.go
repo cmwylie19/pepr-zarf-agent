@@ -6,12 +6,11 @@ import (
 
 	// "fmt"
 
+	"encoding/json"
 	"fmt"
 	"syscall/js"
-	"unicode/utf8"
 
-	"github.com/sergi/go-diff/diffmatchpatch"
-	"gopkg.in/yaml.v2"
+	"github.com/defenseunicorns/zarf/src/pkg/transform"
 	admission "k8s.io/api/admission/v1"
 )
 
@@ -24,57 +23,8 @@ import (
 //		// Function Arguments
 //		Args []interface{}
 //	}
-const RawReview = `
-apiVersion: admission.k8s.io/v1
-kind: AdmissionReview
-request:
-  uid: 705ab4f5-6393-11e8-b7cc-42010a800002
-  kind:
-    group: autoscaling
-    version: v1
-    kind: Scale
-  resource:
-    group: apps
-    version: v1
-    resource: deployments
-  subResource: scale
 
-  requestKind:
-    group: autoscaling
-    version: v1
-    kind: Scale
-  requestResource:
-    group: apps
-    version: v1
-    resource: deployments
-  requestSubResource: scale
-  name: my-deployment
-  namespace: my-namespace
-  operation: UPDATE
-
-  userInfo:
-    username: admin
-
-    uid: 014fbff9a07c
-    groups:
-      - system:authenticated
-      - my-admin-group
-    extra:
-      some-key:
-        - some-value1
-        - some-value2
-  object:
-    apiVersion: autoscaling/v1
-    kind: Scale
-  oldObject:
-    apiVersion: autoscaling/v1
-    kind: Scale
-  options:
-    apiVersion: meta.k8s.io/v1
-    kind: UpdateOptions
-  dryRun: False
-`
-
+// Convert js.Value to WASM Request
 type WASMRequest struct {
 	Request admission.AdmissionReview `json:"request,omitempty" protobuf:"bytes,1,opt,name=request"`
 	// Kubernetes Resource
@@ -83,81 +33,82 @@ type WASMRequest struct {
 	Args []interface{} `json:"args,omitempty" protobuf:"bytes,1,opt,name=args"`
 }
 
-func MarshalReview() admission.AdmissionReview {
-	var admission admission.AdmissionReview
-
-	if err := yaml.Unmarshal([]byte(RawReview), &admission); err != nil {
-		fmt.Errorf("could not unmarshall argument to WASMRequest ", err)
-	}
-	return admission
+//	type WASMRequest struct {
+//		Egress map[string]interface{}
+//	}
+type WASMRequestIngress struct {
+}
+type WASMRequestEgress struct {
+	Request  []byte        // Represents admission.AdmissionReview
+	Resource []byte        // Represents a Kubernetes Resources
+	Args     []interface{} // Represents arguments
 }
 
-// PrintDiff prints the differences between a and b with a as original and b as new
-func PrintDiff(textA, textB string) {
-	dmp := diffmatchpatch.New()
+var wasmRequest WASMRequest
+var wasmRequestEgress WASMRequestEgress
 
-	diffs := dmp.DiffMain(textA, textB, true)
+// argument is type of resource
+// func ConvertResource(this js.Value, args []js.Value) interface{} {
 
-	diffs = dmp.DiffCleanupSemantic(diffs)
-
-	fmt.Println(dmp.DiffPrettyHtml(diffs))
+// }
+func GetResource(this js.Value, args []js.Value) interface{} {
+	return fmt.Sprintf("%s", args[0])
 }
-func ConvertToWASMRequest(this js.Value, args []js.Value) interface{} {
-	wasmRequest := WASMRequest{}
+func TransformImage(this js.Value, args []js.Value) interface{} {
+	targetHost := fmt.Sprintf("%s", args[0])
+	srcReference := fmt.Sprintf("%s", args[1])
+	transformed, _ := transform.ImageTransformHost(targetHost, srcReference)
+	wasmRequest.Args = []interface{}{targetHost, srcReference}
+	return transformed
+}
+func ConvertAdmissionRequest(this js.Value, args []js.Value) interface{} {
 	var admission admission.AdmissionReview
-	fmt.Printf("%s", args[0].String())
 
-	if utf8.Valid([]byte(args[0].String())) {
-		fmt.Println("Valid")
-	} else {
-		fmt.Println("Not valid")
-	}
-	fmt.Printf("Type %T", args[0].String())
+	// Convert AdmissionReview js.Value to bytes
 	admissionString := []byte(fmt.Sprintf("%s", args[0].String()))
 
-	// compare strings
-	if fmt.Sprintf("%s", admissionString) == RawReview {
-		fmt.Println("They are equal")
-	} else {
-		fmt.Println("They are not equal")
-		// PrintDiff(admissionString, RawReview)
-		// fmt.Println(admissionString + "\n----\n" + RawReview)
-
-	}
-
-	for i, val := range []byte(RawReview) {
-		if admissionString[i] != val {
-			fmt.Printf("False! Bytes different %d %s != %s", i, string(admissionString[i]), string(val))
-			break
-		}
-	}
-
-	if err := yaml.Unmarshal([]byte(RawReview), &admission); err != nil {
+	// Unmarshall into AdmissionReview object
+	if err := json.Unmarshal([]byte(admissionString), &admission); err != nil {
 		fmt.Println("could not unmarshall argument to WASMRequest - RawReview ", err)
 		return nil
 	}
 
-	// bytes := []byte(admissionString)
-	// fmt.Printf("Value of bytes is %v", reflect.bytes)
-	if err := yaml.Unmarshal(admissionString, &admission); err != nil {
-		fmt.Println(err)
-		return nil
-	}
-	fmt.Println("Got to the end")
+	// Build WASM Request
 	wasmRequest.Request = admission
 
-	marshalledString, err := yaml.Marshal(wasmRequest.Request)
+	// Marshall wasmRequest into a string - to send back
+	marshalledString, err := json.Marshal(wasmRequest.Request)
 	if err != nil {
 		fmt.Println("Couldnt marshal the string")
 	}
 
-	// jsonData, err := y.YAMLToJSON([]byte(marshalledString))
-	// if err != nil {
-	// 	fmt.Println("Error marshaling JSON:", err)
-	// 	return nil
-	// }
+	// Create an empty interface to hold the parsed JSON data
+	var data interface{}
 
-	return string(marshalledString)
+	// Unmarshal the JSON string into the interface
+	err = json.Unmarshal([]byte(marshalledString), &data)
+	if err != nil {
+		fmt.Println("Error:", err)
+
+	}
+
+	// Marshal the interface into a pretty-printed JSON string
+	wasmRequestEgress.Request, err = json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		fmt.Println("Error:", err)
+
+	}
+
+	//return string(wasmRequestEgress.Request)
+	foods := map[string]interface{}{
+		"bacon": "delicious",
+		"eggs": map[string]interface{}{
+			"chicken": 1.75,
+		},
+		"steak": true,
+	}
+	return foods
+	//return string(wasmRequestEgress.Request)
 	//return
 	//return wasmRequest
 
@@ -174,11 +125,16 @@ func add(this js.Value, args []js.Value) interface{} {
 }
 
 func main() {
-	// wasmReq := SendWASMRequest()
-	// fmt.Printf("%s", fmt.Sprintf("%s", wasmReq))
-	fmt.Printf("%+v", MarshalReview())
+
 	js.Global().Set("add", js.FuncOf(add))
-	js.Global().Set("ConvertToWASMRequest", js.FuncOf(ConvertToWASMRequest))
+	js.Global().Set("ConvertAdmissionRequest", js.FuncOf(ConvertAdmissionRequest))
+	js.Global().Set("TransformImage", js.FuncOf(TransformImage))
+	js.Global().Set("GetResource", js.FuncOf(GetResource))
+	// research how to scope functions to a module
+	// - would  all wasm functions from an AdmissionPatch
+	// -- pod.Merge and return a deepPartial from WASM
+	// use reflect to map to string interface
+	// we could do all annotations
 
 	select {}
 }

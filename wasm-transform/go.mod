@@ -5,6 +5,7 @@ go 1.20
 replace github.com/defenseunicorns/zarf v0.28.1 => github.com/cmwylie19/zarf v0.28.3
 
 require (
+	github.com/defenseunicorns/zarf v0.28.2
 	github.com/ghodss/yaml v1.0.0
 	github.com/sergi/go-diff v1.3.1
 	gopkg.in/yaml.v2 v2.4.0
@@ -12,12 +13,15 @@ require (
 )
 
 require (
+	github.com/distribution/distribution v2.8.2+incompatible // indirect
+	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
+	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/text v0.10.0 // indirect

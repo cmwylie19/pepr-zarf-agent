@@ -103,6 +103,7 @@ When(a.Pod)
             _initSecrets.zarfStateSecret.registryInfo.address
           );
         });
+      // pod.Merge() deepPartial from WASM
 
         // add zarf-agent label to pod to be ignored next time
         pod.SetAnnotation("zarg-agent/dev", "patched");
