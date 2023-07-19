@@ -1,122 +1,131 @@
 <!DOCTYPE html>
 <html>
+  <head>
+    <meta charset="UTF-8" />
+    <script src="wasm_exec.js"></script>
+    <title>WASM Integration Test</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css?family=Red+Hat+Display");
 
-<head>
-  <meta charset="UTF-8" />
-  <script src="wasm_exec.js"></script>
-  <title>WASM Integration Test</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css?family=Red+Hat+Display');
+      button {
+        width: 100%;
+        position: fixed;
+        padding: 10px;
+        top: 10;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        font-family: "Red Hat Display", sans-serif;
+        z-index: 99;
+        font-weight: 600;
+        font-size: 14px;
+        color: #fbfbfb;
+        background-color: #d14667;
+      }
 
-    button {
-      width: 100%;
-      position: fixed;
-      padding: 10px;
-      top: 10;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      font-family: 'Red Hat Display', sans-serif;
-      z-index: 99;
-      font-weight: 600;
-      font-size: 14px;
-      color: #fbfbfb;
-      background-color: #d14667;
-    }
+      .header {
+        z-index: 99;
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        text-align: center;
+        background: #fbfbfb;
+        opacity: 1;
+        color: #333;
+        border-radius: 14px;
+        box-shadow: 2px 2px #676767;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+      }
 
-    .header {
-      z-index: 99;
-      display: flex;
-      justify-content: space-between;
-      padding: 10px;
-      text-align: center;
-      background: #fbfbfb;
-      opacity: 1;
-      color: #333;
-      border-radius: 14px;
-      box-shadow: 2px 2px #676767;
-      position: fixed;
-      left: 0;
-      right: 0;
-      top: 0;
-    }
+      .logo {
+        width: 50px;
+        transition: transform 0.3s;
+      }
 
-    .logo {
-      width: 50px;
-      transition: transform 0.3s;
-    }
+      .logo:hover {
+        transform: rotateY(180deg);
+      }
 
-    .logo:hover {
-      transform: rotateY(180deg);
-    }
+      .header-text {
+        font-family: "Red Hat Display", sans-serif;
+        color: #333;
+        transition: color 0.3s;
+      }
 
-    .header-text {
-      font-family: 'Red Hat Display', sans-serif;
-      color: #333;
-      transition: color 0.3s;
-    }
+      .header-text:hover {
+        color: #d14667;
+        /* //d14667 */
+      }
 
-    .header-text:hover {
-      color: #d14667;
-      /* //d14667 */
-    }
+      .left {
+        position: relative;
+        top: 70px;
+        justify-content: flex-start;
+        align-items: center;
+        width: 100%;
+        position: absolute;
+        margin: 8px;
+        padding: 8px;
+        left: 0;
+        right: 0;
+        margin-bottom: 4px !important;
+        font-weight: 700;
+        /* padding: 4px; */
+      }
+      .centered {
+        text-align: center;
+        display: flex;
+        justify-content: space-around;
+        position: relative;
+        top: 65px;
+      }
+      container {
+        z-index: 1;
+        position: relative;
+        top: 20px;
+        margin-top: 30px;
+        padding-top: 8px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+    </style>
+  </head>
 
+  <body>
+    <div class="header">
+      <img
+        class="logo"
+        src="https://github.com/defenseunicorns/pepr/raw/main/.images/pepr.png"
+        height="50px"
+      />
+      <h3 class="header-text">Image Transform Vertical</h3>
+      <img
+        class="logo"
+        src="https://github.com/defenseunicorns/zarf/raw/main/.images/zarf-logo.png"
+        height="50px"
+      />
+    </div>
 
-    .left {
-      position: relative;
-      top: 70px;
-      justify-content: flex-start;
-      align-items: center;
-      width: 100%;
-      position: absolute;
-      margin: 8px;
-      padding: 8px;
-      left: 0;
-      right: 0;
-      margin-bottom: 4px !important;
-      font-weight: 700;
-      /* padding: 4px; */
-    }
-    .centered {
-      text-align: center;
-      display: flex;
-      justify-content: space-around;
-      position: relative;
-      top: 65px;
-    }
-    container {
-      z-index: 1;
-      position: relative;
-      top: 20px;
-      margin-top: 30px;
-      padding-top: 8px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-  </style>
-</head>
+    <script>
+      const go = new Go();
+      WebAssembly.instantiateStreaming(
+        fetch("main.wasm"),
+        go.importObject
+      ).then(result => {
+        go.run(result.instance);
+      });
+    </script>
 
-<body>
-  <div class="header">
-    <img class="logo" src="https://github.com/defenseunicorns/pepr/raw/main/.images/pepr.png" height="50px" />
-    <h3 class="header-text">Image Transform Vertical</h3>
-    <img class="logo" src="https://github.com/defenseunicorns/zarf/raw/main/.images/zarf-logo.png" height="50px" />
-  </div>
-
-  <script>
-    const go = new Go();
-    WebAssembly.instantiateStreaming(
-      fetch("main.wasm"),
-      go.importObject
-    ).then(result => {
-      go.run(result.instance);
-    });
-  </script>
-
-<div class="centered"><h4 >Pepr Request</h4><h4 >Tranformed Pod</h4></div>
-  <container>
-    <pre id="podPre">
+    <div class="centered">
+      <h4>Pepr Request</h4>
+      <h4>Tranformed Pod</h4>
+    </div>
+    <container>
+      <pre id="podPre">
 {
   "Raw": {
     "kind": "Pod",
@@ -428,34 +437,32 @@
 }
 
     
-</pre>
-    <pre id="podPost"></pre>
-  </container>
-  <button onclick="callPodTransform()">PodTransform</button>
-</body>
-<script>
-  targetHost = document.getElementById("targetHost");
-  srcReference = document.getElementById("srcReference");
-  transformedImage = document.getElementById("transformedImage");
-  podPre = document.getElementById("podPre");
-  podPost = document.getElementById("podPost");
-  let wasmRequest = {};
-  function callPodTransform() {
-    let transformedPod = JSON.parse(podTransform(
-      podPre.innerHTML,
-      "regcred",
-      "gitlab.com/project"
-    ));
-    transformedPod.metadata.managedFields = ["removed"];
-    podPost.innerHTML = JSON.stringify(transformedPod, null, 2);
-  }
+</pre
+      >
+      <pre id="podPost"></pre>
+    </container>
+    <button onclick="callPodTransform()">PodTransform</button>
+  </body>
+  <script>
+    targetHost = document.getElementById("targetHost");
+    srcReference = document.getElementById("srcReference");
+    transformedImage = document.getElementById("transformedImage");
+    podPre = document.getElementById("podPre");
+    podPost = document.getElementById("podPost");
+    let wasmRequest = {};
+    function callPodTransform() {
+      let transformedPod = JSON.parse(
+        podTransform(podPre.innerHTML, "regcred", "gitlab.com/project")
+      );
+      transformedPod.metadata.managedFields = ["removed"];
+      podPost.innerHTML = JSON.stringify(transformedPod, null, 2);
+    }
 
-  function callWASMTransformImage() {
-    target_host = targetHost.value;
-    src_reference = srcReference.value;
-    transformedImage.innerHTML = TransformImage(target_host, src_reference);
-    //wasmRequest.Args = [target_host,src_reference,TransformImage(target_host, src_reference);]
-  }
-</script>
-
+    function callWASMTransformImage() {
+      target_host = targetHost.value;
+      src_reference = srcReference.value;
+      transformedImage.innerHTML = TransformImage(target_host, src_reference);
+      //wasmRequest.Args = [target_host,src_reference,TransformImage(target_host, src_reference);]
+    }
+  </script>
 </html>
