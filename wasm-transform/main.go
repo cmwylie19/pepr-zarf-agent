@@ -30,7 +30,7 @@ func ReplacePatchOperation(path string, value interface{}) PatchOperation {
 	}
 }
 
-// func ConvertAdmissionRequest(this js.Value, args []js.Value) interface{} {
+// func ConrtAdmissionRequest(this js.Value, args []js.Value) interface{} {
 
 // 	foods := map[string]interface{}{
 // 		"bacon": "delicious",
@@ -49,23 +49,25 @@ func ReplacePatchOperation(path string, value interface{}) PatchOperation {
 // }
 
 func podTransform(this js.Value, args []js.Value) interface{} {
-	peprRequest := args[0].String()
-	imagePullSecretName := args[1].String()
-	targetHost := args[2].String()
-	// srcReference := args[3].String()
+
+	// Get arguments from Pepr
+	rawRequest := args[0].String()
+	// admissionRequest := args[1].String()
+	imagePullSecretName := args[2].String()
+	targetHost := args[3].String()
+
 	pod := &corev1.Pod{}
-	var patchOperations []PatchOperation
 
 	// Define a variable to hold the parsed JSON data
 	var data map[string]interface{}
 
 	// Unmarshal the JSON string into the data variable
-	err := json.Unmarshal([]byte(peprRequest), &data)
+	err := json.Unmarshal([]byte(rawRequest), &data)
 	if err != nil {
 		log.Fatal(err)
 	}
 	// Convert the interface to a JSON byte array
-	podBytes, err := json.Marshal(data["Raw"])
+	podBytes, err := json.Marshal(data)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,13 +84,13 @@ func podTransform(this js.Value, args []js.Value) interface{} {
 		return nil
 	}
 
-	patchOperations = addImagePullSecret(pod, imagePullSecretName, patchOperations)
-	patchOperations = transformContainerImages(pod, targetHost, patchOperations)
-	patchOperations = addPatchedLabel(pod, patchOperations)
+	addImagePullSecret(pod, imagePullSecretName)
+	transformContainerImages(pod, targetHost)
+	addPatchedLabel(pod)
 
 	// fmt.Printf("%s\n", pod.Name)
 	fmt.Printf("POD\n%+v", pod)
-	fmt.Println("Raw Object:\n", fmt.Sprintf("%s", data["Raw"]))
+
 	// PrettyPrint
 	// Create an empty interface to unmarshal the JSON string
 	// Marshal the Pod object into a pretty printed JSON string
@@ -102,9 +104,8 @@ func podTransform(this js.Value, args []js.Value) interface{} {
 	podString := string(podBytes)
 	return string(podString)
 }
-func addPatchedLabel(pod *corev1.Pod, patchOperations []PatchOperation) []PatchOperation {
+func addPatchedLabel(pod *corev1.Pod) {
 	pod.Labels["zarf-agent"] = "patched"
-	return append(patchOperations, ReplacePatchOperation("/metadata/labels/zarf-agent", "patched"))
 }
 func checkIgnoreLabels(pod *corev1.Pod) bool {
 	// check if pod has ignoreLables
@@ -115,17 +116,15 @@ func checkIgnoreLabels(pod *corev1.Pod) bool {
 	return false
 }
 
-func addImagePullSecret(pod *corev1.Pod, imagePullSecretName string, patchOperations []PatchOperation) []PatchOperation {
+func addImagePullSecret(pod *corev1.Pod, imagePullSecretName string) {
 	pod.Spec.ImagePullSecrets = append(pod.Spec.ImagePullSecrets, corev1.LocalObjectReference{
 		Name: imagePullSecretName,
 	})
-	return append(patchOperations, ReplacePatchOperation("/spec/imagePullSecrets", imagePullSecretName))
 }
 
-func transformContainerImages(pod *corev1.Pod, targetHost string, patchOperations []PatchOperation) []PatchOperation {
+func transformContainerImages(pod *corev1.Pod, targetHost string) {
 	// update the image host for each init container
 	for idx, container := range pod.Spec.InitContainers {
-		path := fmt.Sprintf("/spec/initContainers/%d/image", idx)
 		replacement, err := transform.ImageTransformHost(targetHost, container.Image)
 
 		if err != nil {
@@ -133,24 +132,20 @@ func transformContainerImages(pod *corev1.Pod, targetHost string, patchOperation
 			continue // Continue, because we might as well attempt to mutate the other containers for this pod
 		}
 		pod.Spec.InitContainers[idx].Image = replacement
-		patchOperations = append(patchOperations, ReplacePatchOperation(path, replacement))
 	}
 
 	// update the image host for each ephemeral container
 	for idx, container := range pod.Spec.EphemeralContainers {
-		path := fmt.Sprintf("/spec/ephemeralContainers/%d/image", idx)
 		replacement, err := transform.ImageTransformHost(targetHost, container.Image)
 		if err != nil {
 			fmt.Printf(AgentErrImageSwap, err)
 			continue // Continue, because we might as well attempt to mutate the other containers for this pod
 		}
 		pod.Spec.EphemeralContainers[idx].Image = replacement
-		patchOperations = append(patchOperations, ReplacePatchOperation(path, replacement))
 	}
 
 	// update the image host for each normal container
 	for idx, container := range pod.Spec.Containers {
-		path := fmt.Sprintf("/spec/containers/%d/image", idx)
 		replacement, err := transform.ImageTransformHost(targetHost, container.Image)
 		if err != nil {
 			fmt.Printf(AgentErrImageSwap, err)
@@ -159,9 +154,7 @@ func transformContainerImages(pod *corev1.Pod, targetHost string, patchOperation
 		fmt.Println("replacement", replacement)
 		pod.Spec.Containers[idx].Image = replacement
 		fmt.Println(pod.Spec.Containers[idx].Image)
-		patchOperations = append(patchOperations, ReplacePatchOperation(path, replacement))
 	}
-	return patchOperations
 }
 func main() {
 
