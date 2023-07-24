@@ -74,20 +74,14 @@ When(a.Pod)
         return
       }
     }
-
- 
-      try {
-        // transform all containers in pod
-        await _transformer.run();
-       
-          let result = _transformer.transformPod(
-            pod.Raw,
-            pod.Request,
-            _initSecrets.privateRegistrySecretName,
-            _initSecrets.zarfStateSecret.registryInfo.address
-          );
-          Log.info(`Result. ${JSON.stringify(result, undefined, 2)}`);
-      
+    try {
+      await _transformer.run();
+      pod.Raw = JSON.parse(_transformer.transformPod(
+        pod.Raw,
+        pod.Request,
+        _initSecrets.privateRegistrySecretName,
+        _initSecrets.zarfStateSecret.registryInfo.address
+      ))
 
     } catch (err) {
       Log.error("Error transforming pod", err);
