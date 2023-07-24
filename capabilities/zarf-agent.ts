@@ -71,20 +71,21 @@ When(a.Pod)
         Log.info(`InitSecrets initialized. 💯`);
       } catch (err) {
         Log.error("Secrets in zarf namespace do not exist", err);
-        return
+        return;
       }
     }
     try {
       await _transformer.run();
-      pod.Raw = JSON.parse(_transformer.transformPod(
-        pod.Raw,
-        pod.Request,
-        _initSecrets.privateRegistrySecretName,
-        _initSecrets.zarfStateSecret.registryInfo.address
-      ))
-
+      pod.Raw = JSON.parse(
+        _transformer.transformPod(
+          pod.Raw,
+          pod.Request,
+          _initSecrets.privateRegistrySecretName,
+          _initSecrets.zarfStateSecret.registryInfo.address
+        )
+      );
     } catch (err) {
       Log.error("Error transforming pod", err);
     }
-    console.log("pod", JSON.stringify(pod, undefined, 2))
+    console.log("pod", JSON.stringify(pod, undefined, 2));
   });
