@@ -157,8 +157,13 @@ func transformContainerImages(pod *corev1.Pod, targetHost string) {
 	}
 }
 func main() {
+	done := make(chan struct{})
+	//js.Global().Set("podTransform", js.FuncOf(podTransform))
+	// js.Function
 
-	js.Global().Set("podTransform", js.FuncOf(podTransform))
-
-	select {}
+	js.Global().Set("zarfTransform", make(map[string]interface{}))
+	module := js.Global().Get("zarfTransform")
+	module.Set("podTransform", js.FuncOf(podTransform))
+	<-done
+	//select {}
 }

@@ -24,6 +24,13 @@ if (typeof globalThis.crypto === 'undefined') {
 }
 ```
 
+Add "dom" to lib in `tsconfig.json`
+
+```json
+   "lib": [
+      "ES2022","dom"
+    ],
+```
 k create cm wasm --from-file=wasm.go=capabilities/main.wasm --dry-run=client -oyaml 
 
 

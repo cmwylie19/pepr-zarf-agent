@@ -6,8 +6,11 @@
     "emitDeclarationOnly": true,
     "esModuleInterop": true,
     "lib": [
-      "ES2022"
+      "ES2022","DOM"
     ],
+    // "types": [
+    //   "node",
+    // ],
     "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "dist",
@@ -18,6 +21,7 @@
     "useUnknownInCatchVariables": false
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.wasm"
   ]
 }

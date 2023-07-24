@@ -3,6 +3,7 @@ import { K8sAPI } from "./kubernetes-api";
 import { InitSecrets } from "./secrets/initSecrets";
 import { InitSecretsReady } from "./helpers";
 import { TransformerAPI } from "./transformer-api";
+import { log } from "@grpc/grpc-js/build/src/logging";
 /**
  *  The ZarfAgent capability handles pod mutations for Zarf.
  */
@@ -70,45 +71,26 @@ When(a.Pod)
         Log.info(`InitSecrets initialized. 💯`);
       } catch (err) {
         Log.error("Secrets in zarf namespace do not exist", err);
+        return
       }
     }
 
-    // Create a imagePullSecret in Pod namespace
-    if (pod.HasLabel("zarf-agent") || pod.HasLabel("zarf.dev/agent")) {
-      Log.info("Pod has ignore labels. Skipping.");
-    } else {
-      Log.info("Pod does not have ignore labels. Continuing.");
-
-      try {
-        // check if imagePullSecrets exist
-        if (
-          pod.Raw?.spec?.imagePullSecrets !== undefined ||
-          pod.Raw?.spec?.imagePullSecrets !== null
-        ) {
-          pod.Raw.spec.imagePullSecrets = [];
-        }
-        // add imagePullSecret to pod
-        pod.Raw?.spec?.imagePullSecrets?.push({
-          name: _initSecrets.privateRegistrySecretName,
-        });
-      } catch (err) {
-        Log.error("Could not add imagePullSecret to pod", err);
-      }
-
+ 
       try {
         // transform all containers in pod
-        _transformer.run().then(() => {
-          _transformer.transformAllContainers(
-            pod,
+        await _transformer.run();
+       
+          let result = _transformer.transformPod(
+            pod.Raw,
+            pod.Request,
+            _initSecrets.privateRegistrySecretName,
             _initSecrets.zarfStateSecret.registryInfo.address
           );
-        });
-        // pod.Merge() deepPartial from WASM
+          Log.info(`Result. ${JSON.stringify(result, undefined, 2)}`);
+      
 
-        // add zarf-agent label to pod to be ignored next time
-        pod.SetAnnotation("zarg-agent/dev", "patched");
-      } catch (err) {
-        Log.error("Could not patch images of pod", err);
-      }
+    } catch (err) {
+      Log.error("Error transforming pod", err);
     }
+    console.log("pod", JSON.stringify(pod, undefined, 2))
   });
